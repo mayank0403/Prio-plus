@@ -382,13 +382,22 @@ returnType int_sum(const initMsg msg, const int clientfd, const int serverfd, co
     std::unordered_map<std::string, uint64_t> share_map;
     auto start = clock_start();
     
-    int nvalues = 1;
+    int nvalues = 10000;
+    std::cout << "Using gsize of " << nvalues << std::endl;
 
     IntShare share;
     const uint64_t max_val = 1ULL << msg.num_bits;
     const unsigned int total_inputs = msg.num_of_inputs;
-    const size_t nbits[1] = {msg.num_bits};
+    //const size_t nbits[1] = {msg.num_bits};
+    size_t* nbits = (size_t*) malloc(nvalues * sizeof(size_t));
+    for(int i = 0; i < nvalues; i++){
+        nbits[i] = msg.num_bits;
+    }
 
+    // Their code supports all nbits like 32, 64, but 
+    // fixing it to close to 64 (doesn't allow 64) because OT messages can support max 64
+    // and in fact default to 64 since mod is not passed to it.
+    assert(nbits[0] == 63 && "Use 64 bits. See comment above");
     int num_bytes = 0;
     for (unsigned int i = 0; i < total_inputs; i++) {
         num_bytes += recv_in(clientfd, &share, sizeof(IntShare));
