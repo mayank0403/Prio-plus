@@ -162,6 +162,7 @@ uint64_t** intsum_ot_sender(OT_Wrapper* const ot,
     }
 
     ot->send(b0, b1, num_shares * total_bits);
+    std::cout << "OT Sender sends " << ot->io->counter << " bytes" << std::endl;
 
     delete[] b0;
     delete[] b1;
@@ -195,6 +196,7 @@ uint64_t** intsum_ot_receiver(OT_Wrapper* const ot,
     }
 
     ot->recv(r, bool_shares, num_shares * total_bits);
+    std::cout << "OT Receiver sends " << ot->io->counter << " bytes" << std::endl;
 
     delete[] bool_shares;
 

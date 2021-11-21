@@ -46,7 +46,7 @@ CorrelatedStore* correlated_store;
 // If set, does fast but insecure offline precompute.
 #define LAZY_PRECOMPUTE false
 // Whether to use OT or Dabits
-#define USE_OT_B2A false
+#define USE_OT_B2A true
 
 // Note: Currently does it in a single batch.
 // I.e. recieve and store all, then process all.
@@ -381,6 +381,8 @@ returnType bit_sum(const initMsg msg, const int clientfd, const int serverfd, co
 returnType int_sum(const initMsg msg, const int clientfd, const int serverfd, const int server_num, uint64_t& ans) {
     std::unordered_map<std::string, uint64_t> share_map;
     auto start = clock_start();
+    
+    int nvalues = 1;
 
     IntShare share;
     const uint64_t max_val = 1ULL << msg.num_bits;
@@ -425,11 +427,13 @@ returnType int_sum(const initMsg msg, const int clientfd, const int serverfd, co
         }
         std::cout << "PK time: " << sec_from(start2) << std::endl;
         start2 = clock_start();
-        fmpz_t* const shares_p = share_convert(num_inputs, 1, nbits, shares);
+        std::cout << "num_inputs, nvalues (gsize?), nbits " << num_inputs << " " << nvalues << " " << nbits[0] << std::endl;
+        fmpz_t* const shares_p = share_convert(num_inputs, nvalues, nbits, shares);
         std::cout << "convert time: " << sec_from(start2) << std::endl;
         start2 = clock_start();
 
         bool* const valid = new bool[num_inputs];
+        std::cout << "Receive result share from other server" << std::endl;
         recv_bool_batch(serverfd, valid, num_inputs);
 
         fmpz_t* b; new_fmpz_array(&b, 1);
@@ -462,10 +466,12 @@ returnType int_sum(const initMsg msg, const int clientfd, const int serverfd, co
         }
         std::cout << "PK time: " << sec_from(start2) << std::endl;
         start2 = clock_start();
-        fmpz_t* const shares_p = share_convert(num_inputs, 1, nbits, shares);
+        std::cout << "num_inputs, nvalues (gsize?), nbits " << num_inputs << " " << nvalues << " " << nbits[0] << std::endl;
+        fmpz_t* const shares_p = share_convert(num_inputs, nvalues, nbits, shares);
         std::cout << "convert time: " << sec_from(start2) << std::endl;
         start2 = clock_start();
 
+        std::cout << "Send result share to other server" << std::endl;
         server_bytes += send_bool_batch(serverfd, valid, num_inputs);
         
         fmpz_t* a; new_fmpz_array(&a, 1);
